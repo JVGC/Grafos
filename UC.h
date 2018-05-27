@@ -48,7 +48,8 @@ typedef struct uc{
 }UC;
 
 
-void decifra_instrucao(int inst);
+
+decifra_instrucao(int inst);
 
 void seta_sinal_controle(UC* u, int cod_inst);
 
