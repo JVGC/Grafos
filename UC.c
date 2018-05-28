@@ -8,10 +8,36 @@ int decifra_instrucao(int inst){
 
 
 	int cod_inst = inst >> 26;
+	//printf("INST =  %d\n",inst);
+	printf("COD_INST =  %d\n",cod_inst);
 
-	printf("%d\n",cod_inst);
+	if(cod_inst != 0 && cod_inst != 2 && cod_inst != 3 && cod_inst != 4 && cod_inst != 5  && cod_inst != 8 && cod_inst != 12 && cod_inst != 20 && cod_inst != 21 && cod_inst != 35 && cod_inst != 43)
+		return -1;
 
 	return cod_inst;
+}
+
+
+int  decifra_operacao(int inst){
+	int cod_op;
+
+	cod_op = (inst & 63); //111111
+
+	 if(cod_op == 32){ //add
+	 	cod_op = 0;
+	 }else if(cod_op == 34){ //sub
+	 	cod_op = 1;
+	 }else if(cod_op == 36){ //and
+	 	cod_op = 3;
+	 }else if(cod_op == 37){ //or
+	 	cod_op = 4;
+	 }else if(cod_op == 42){ //set or less than
+	 	cod_op = 5;
+	 }
+
+
+	 return cod_op;
+
 }
 
 void seta_sinal_controle(UC* u, int cod_inst){
@@ -54,7 +80,7 @@ void seta_sinal_controle(UC* u, int cod_inst){
 
 
 	//cod_inst = inst >> 26;
-	printf("%d\n",cod_inst);
+	//printf("%d\n",cod_inst);
 
 	int OP0, OP1, OP2, OP3, OP4, OP5;
 
@@ -64,7 +90,7 @@ void seta_sinal_controle(UC* u, int cod_inst){
 	OP2 = (cod_inst & 4) >> 2;
 	OP1 = (cod_inst & 2) >> 1;
 	OP0 = (cod_inst & 1);
-	printf("%d%d%d%d%d%d\n",OP5, OP4, OP3, OP2, OP1, OP0);
+	//printf("%d%d%d%d%d%d\n",OP5, OP4, OP3, OP2, OP1, OP0);
 
 	u->proximo_estado.s0 = (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0))
 		OR (NOT(S3) AND S2 AND S1 AND NOT(S0))
@@ -78,9 +104,13 @@ void seta_sinal_controle(UC* u, int cod_inst){
 		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0));
 
 	printf("ns0 = %d\n", u->proximo_estado.s0);
+	// 1011
 
-	u->proximo_estado.s1 = (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND ((OP5 AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND OP1 AND OP0) OR (OP5 AND NOT(OP4) AND OP3 AND NOT(OP2) AND OP1 AND OP0) OR (NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0)) ) )
-		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND (OP5 AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND OP1 AND OP0) OR (NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0)))
+	u->proximo_estado.s1 = (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND OP5 AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND OP1 AND OP0)
+		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND OP5 AND NOT(OP4) AND OP3 AND NOT(OP2) AND OP1 AND OP0)
+		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0))
+		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND OP5 AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND OP1 AND OP0)
+		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0))
 		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND NOT(OP5) AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND NOT(OP1) AND NOT(OP0))
 		OR (NOT(S3) AND S2 AND S1 AND NOT(S0))
 		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND NOT(OP5) AND NOT(OP4) AND OP3 AND OP2 AND NOT(OP1) AND NOT(OP0))
@@ -139,5 +169,45 @@ void printa_sinal(UC Control_Unit){
 	printf("RegDst1 = %d\n", Control_Unit.RegDst1);
 	printf("PCWriteCond = %d\n", Control_Unit.PCWriteCond);
 	printf("BNE = %d\n", Control_Unit.BNE);
+
+}
+
+
+void Imprime_registradores(int* Registradores){
+
+	printf("\nBanco de Registradores\n");
+
+	printf("R00(r0)=%d\n", Registradores[0]);
+	printf("R01(at)=%d\n", Registradores[1]);
+	printf("R02(v0)=%d\n", Registradores[2]);
+	printf("R03(v1)=%d\n", Registradores[3]);
+	printf("R04(a0)=%d\n", Registradores[4]);
+	printf("R05(a1)=%d\n", Registradores[5]);
+	printf("R06(a2)=%d\n", Registradores[6]);
+	printf("R07(a3)=%d\n", Registradores[7]);
+	printf("R08(t0)=%d\n", Registradores[8]);
+	printf("R09(t1)=%d\n", Registradores[9]);
+	printf("R10(t2)=%d\n", Registradores[10]);
+	printf("R11(t3)=%d\n", Registradores[11]);
+	printf("R12(t4)=%d\n", Registradores[12]);
+	printf("R13(t5)=%d\n", Registradores[13]);
+	printf("R14(t6)=%d\n", Registradores[14]);
+	printf("R15(t7)=%d\n", Registradores[15]);
+	printf("R16(s0)=%d\n", Registradores[16]);
+	printf("R17(s1)=%d\n", Registradores[17]);
+	printf("R18(s2)=%d\n", Registradores[18]);
+	printf("R19(s3)=%d\n", Registradores[19]);
+	printf("R20(s4)=%d\n", Registradores[20]);
+	printf("R21(s5)=%d\n", Registradores[21]);
+	printf("R22(s6)=%d\n", Registradores[22]);
+	printf("R23(s7)=%d\n", Registradores[23]);
+	printf("R24(t8)=%d\n", Registradores[24]);
+	printf("R25(t9)=%d\n", Registradores[25]);
+	printf("R26(k0)=%d\n", Registradores[26]);
+	printf("R27(k1)=%d\n", Registradores[27]);
+	printf("R28(gp)=%d\n", Registradores[28]);
+	printf("R29(sp)=%d\n", Registradores[29]);
+	printf("R30(fp)=%d\n", Registradores[30]);
+	printf("R31(ra)=%d\n", Registradores[31]);
 
 }

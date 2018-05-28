@@ -54,10 +54,16 @@ typedef struct ula{
 
 	int op;
 	int result;
-
-
+	int zero;
 }ULA;
 
+typedef struct {
+
+
+
+}UC_ULA;
+
+int decifra_operacao(int inst);
 
 int decifra_instrucao(int inst);
 
@@ -65,6 +71,7 @@ void seta_sinal_controle(UC* u, int cod_inst);
 
 void printa_sinal(UC Control_Unit);
 
+void Imprime_registradores(int* Registradores);
 
 
 
