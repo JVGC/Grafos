@@ -104,12 +104,20 @@ int main()
 			return 0;
 		}
 
-		A = IR >> 20;
+		A = IR >> 21;
+		
 		A = (A & 31); //11111
 		
-		B = IR >> 15;
-		B = (B & 31);
+		B = IR >> 16;
+		
 
+
+		B = (B & 31);
+		
+		printf("A = %d\n", A);
+		printf("B = %d\n", B);
+		
+		
 		immediate = ((IR) << 16) >> 16;
 
 		
@@ -180,6 +188,7 @@ int main()
 
 		if(Control_Unit.RegDst0 == 0 && Control_Unit.RegDst1 == 0){
 			// write register recebe os bits de 20 a 16 da instrucao
+			printf("oi\n");
 			write_register = B;
 
 		}else if(Control_Unit.RegDst0 == 1 && Control_Unit.RegDst1 == 0){
