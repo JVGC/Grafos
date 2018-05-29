@@ -62,7 +62,7 @@ int main()
 	int cont = 0;	
 
 
-	while(cont < 50){
+	while(1){
 
 
 		seta_sinal_controle(&Control_Unit, cod_inst);
@@ -150,7 +150,7 @@ int main()
 			Arithmetic_Unit.param2  = (int)((immediate) << 16) >> 16; 
 		}else{
 			// parametro 2 da ULA recebe valor imediato shiftado 2 bits
-			Arithmetic_Unit.param2  = (int)((immediate) << 16) >> 14; 
+			Arithmetic_Unit.param2  = (int)(((immediate) << 16) >> 14) / 4; 
 			//printf("Param2 = %d\n", Arithmetic_Unit.param2 );
 			//printf("BEQ\n");
 
@@ -185,8 +185,9 @@ int main()
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 | Arithmetic_Unit.param2;
 		}else if(Arithmetic_Unit.op == 5){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 - Arithmetic_Unit.param2;
-			if(Arithmetic_Unit.result == 0){
+			if(Arithmetic_Unit.result <= 0){
 				Arithmetic_Unit.zero = 1;
+				Arithmetic_Unit.result = 1;
 			}else{
 				Arithmetic_Unit.zero = 0;
 			}
@@ -207,7 +208,7 @@ int main()
 
 		}else if(Control_Unit.RegDst0 == 1 && Control_Unit.RegDst1 == 0){
 			// write register recebe os bits de 15 a 11 da instrucao
-			write_register = (IR >> 10) & 31;
+			write_register = (IR >> 11) & 31;
 
 		}else if(Control_Unit.RegDst0 == 0 && Control_Unit.RegDst1 == 1){
 			// write register recebe $ra(31)
@@ -233,7 +234,7 @@ int main()
 		}
 
 		if(Control_Unit.RegWrite == 1){
-			printf("write_register = %d\n", write_register);
+			//printf("write_register = %d\n", write_register);
 				Registradores[write_register] = write_data;
 		}
 
@@ -280,10 +281,11 @@ int main()
 		}else if(Control_Unit.PCSource0 == 0 && Control_Unit.PCSource1 == 1){
 			//PC recebe endereço da jump
 			//printf("ASHSAUHSUAHASUHASUHSAUHASUHASUASUHAS\n");
-			//printf("jump =%d\n", ENDjump);
-			if(Control_Unit.PCWrite == 1)
+			
+			if(Control_Unit.PCWrite == 1){
+				//printf("jump =%d\n", ENDjump);
 				PC = ENDjump;
-			else{
+			}else{
 				//verificar os BNE da vida
 				if((BNE & Control_Unit.PCWriteCond) == 1){
 					PC = ENDjump;

@@ -72,11 +72,12 @@ void seta_sinal_controle(UC* u, int cod_inst){
 	u->RegDst1 = NOT(S1);
 	u->BNE = S2;
 	u->PCWriteCond = S3 AND NOT(S1) AND NOT(S0);
-	u->PCWrite = (S3 AND S2 AND NOT(S1)) OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0)) OR (S3 AND S2 AND S0);
+	u->PCWrite = (S3 AND S2 AND NOT(S1)) OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0)) OR (S3 AND S2 AND S0) OR (S3 AND NOT(S1) AND S0);
 	u->MemWrite = NOT(S3) AND S2 AND NOT(S1) AND S0;
 	u->MemRead = (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0)) OR (NOT(S3) AND NOT(S2) AND S1 AND S0);
 	u->RegWrite = (NOT(S3) AND S2 AND NOT(S1) AND NOT(S0)) OR (NOT(S3) AND S2 AND S1 AND S0) OR (S3 AND NOT(S2) AND S1 AND S0) OR (S3 AND S2 AND NOT(S1) AND S0);
 
+	// AC'D + ABC' + ABD + A'B'C'D'
 	//ABD 
 	//ABC' + A'B'C'D'
 	//cod_inst = inst >> 26;
