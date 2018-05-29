@@ -72,13 +72,13 @@ void seta_sinal_controle(UC* u, int cod_inst){
 	u->RegDst1 = NOT(S1);
 	u->BNE = S2;
 	u->PCWriteCond = S3 AND NOT(S1) AND NOT(S0);
-	u->PCWrite = (S3 AND NOT(S1)) OR (NOT(S2) AND NOT(S1) AND NOT(S0)) OR (S3 AND S2 AND S0);
+	u->PCWrite = (S3 AND S2 AND NOT(S1)) OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0)) OR (S3 AND S2 AND S0);
 	u->MemWrite = NOT(S3) AND S2 AND NOT(S1) AND S0;
 	u->MemRead = (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0)) OR (NOT(S3) AND NOT(S2) AND S1 AND S0);
 	u->RegWrite = (NOT(S3) AND S2 AND NOT(S1) AND NOT(S0)) OR (NOT(S3) AND S2 AND S1 AND S0) OR (S3 AND NOT(S2) AND S1 AND S0) OR (S3 AND S2 AND NOT(S1) AND S0);
 
-
-
+	//ABD 
+	//ABC' + A'B'C'D'
 	//cod_inst = inst >> 26;
 	//printf("%d\n",cod_inst);
 
@@ -90,7 +90,7 @@ void seta_sinal_controle(UC* u, int cod_inst){
 	OP2 = (cod_inst & 4) >> 2;
 	OP1 = (cod_inst & 2) >> 1;
 	OP0 = (cod_inst & 1);
-	//printf("%d%d%d%d%d%d\n",OP5, OP4, OP3, OP2, OP1, OP0);
+	printf("%d%d%d%d%d%d\n",OP5, OP4, OP3, OP2, OP1, OP0);
 
 	u->proximo_estado.s0 = (NOT(S3) AND NOT(S2) AND NOT(S1) AND NOT(S0))
 		OR (NOT(S3) AND S2 AND S1 AND NOT(S0))
@@ -104,12 +104,20 @@ void seta_sinal_controle(UC* u, int cod_inst){
 		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0));
 
 	printf("ns0 = %d\n", u->proximo_estado.s0);
-	// 1011
+	//010100
+	// 0001
+
+	//100011-> 35 (LW)
+	//101011-> 43 (SW)
+	//001000-> 8 (ADDI)
+	//001100-> 12 (ANDI)
+	//010101-> 21 (JALR)
 
 	u->proximo_estado.s1 = (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND OP5 AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND OP1 AND OP0)
 		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND OP5 AND NOT(OP4) AND OP3 AND NOT(OP2) AND OP1 AND OP0)
 		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0))
 		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND OP5 AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND OP1 AND OP0)
+		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND NOT(OP5) AND OP4 AND NOT(OP3) AND OP2 AND NOT(OP1) AND NOT(OP0))
 		OR (NOT(S3) AND NOT(S2) AND S1 AND NOT(S0) AND NOT(OP5) AND NOT(OP4) AND OP3 AND NOT(OP2) AND NOT(OP1) AND NOT(OP0))
 		OR (NOT(S3) AND NOT(S2) AND NOT(S1) AND S0 AND NOT(OP5) AND NOT(OP4) AND NOT(OP3) AND NOT(OP2) AND NOT(OP1) AND NOT(OP0))
 		OR (NOT(S3) AND S2 AND S1 AND NOT(S0))

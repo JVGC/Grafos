@@ -62,7 +62,7 @@ int main()
 	int cont = 0;	
 
 
-	while(cont < 400){
+	while(cont < 50){
 
 
 		seta_sinal_controle(&Control_Unit, cod_inst);
@@ -151,6 +151,8 @@ int main()
 		}else{
 			// parametro 2 da ULA recebe valor imediato shiftado 2 bits
 			Arithmetic_Unit.param2  = (int)((immediate) << 16) >> 14; 
+			//printf("Param2 = %d\n", Arithmetic_Unit.param2 );
+			//printf("BEQ\n");
 
 		}
 
@@ -160,6 +162,7 @@ int main()
 			Arithmetic_Unit.op = 0;
 		}else if(Control_Unit.ALUOp0 == 1 && Control_Unit.ALUOp1 == 0){ // operacao de subtracao
 			Arithmetic_Unit.op = 1;
+			//printf("BEQ\n");
 		}else if(Control_Unit.ALUOp0 == 1 && Control_Unit.ALUOp1 == 1){ // operacao de AND
 			Arithmetic_Unit.op = 3;
 		}else{ // chama a unidade de controle da ULA para decifrar a operacao
@@ -170,12 +173,23 @@ int main()
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 + Arithmetic_Unit.param2;
 		}else if(Arithmetic_Unit.op == 1){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 - Arithmetic_Unit.param2;
+			//printf("Arithmetic_Unit.result = %d\n",Arithmetic_Unit.result );
+			if(Arithmetic_Unit.result == 0){
+				Arithmetic_Unit.zero = 1;
+			}else{
+				Arithmetic_Unit.zero = 0;
+			}
 		}else if(Arithmetic_Unit.op == 3){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 & Arithmetic_Unit.param2;
 		}else if(Arithmetic_Unit.op == 4){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 | Arithmetic_Unit.param2;
 		}else if(Arithmetic_Unit.op == 5){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 - Arithmetic_Unit.param2;
+			if(Arithmetic_Unit.result == 0){
+				Arithmetic_Unit.zero = 1;
+			}else{
+				Arithmetic_Unit.zero = 0;
+			}
 		}
 
 
@@ -188,7 +202,7 @@ int main()
 
 		if(Control_Unit.RegDst0 == 0 && Control_Unit.RegDst1 == 0){
 			// write register recebe os bits de 20 a 16 da instrucao
-			printf("oi\n");
+			//printf("oi\n");
 			write_register = B;
 
 		}else if(Control_Unit.RegDst0 == 1 && Control_Unit.RegDst1 == 0){
@@ -223,6 +237,20 @@ int main()
 				Registradores[write_register] = write_data;
 		}
 
+		// MUX DO BNE
+
+		if(Control_Unit.BNE == 0){
+			//BNE RECEBE SINAL zero DA ULA
+			BNE = Arithmetic_Unit.zero;
+			//printf("BNE = %d\n", BNE);
+			//printf("BEQ\n");
+
+		}else{
+			//BNE RECEBE NOT(SINAL zero) DA ULA
+			BNE = NOT(Arithmetic_Unit.zero);
+			
+		}
+
 		// MUX DO PC SOURCE
 
 		if(Control_Unit.PCSource0 == 0 && Control_Unit.PCSource1 == 0){
@@ -237,17 +265,21 @@ int main()
 			}
 		}else if(Control_Unit.PCSource0 == 1 && Control_Unit.PCSource1 == 0){
 			// PC RECEBE ALUOut
+
+			//printf("PCWrite =  %d\n", Control_Unit.PCWrite);
 			if(Control_Unit.PCWrite == 1)
 				PC = ALUout;
 			else{
+				//printf("BNE = %d\n", BNE);
 				//verificar os BNE da vida
 				if((BNE & Control_Unit.PCWriteCond) == 1){
+					
 					PC = ALUout;
 				}
 			}
 		}else if(Control_Unit.PCSource0 == 0 && Control_Unit.PCSource1 == 1){
 			//PC recebe endereço da jump
-
+			//printf("ASHSAUHSUAHASUHASUHSAUHASUHASUASUHAS\n");
 			//printf("jump =%d\n", ENDjump);
 			if(Control_Unit.PCWrite == 1)
 				PC = ENDjump;
@@ -258,9 +290,11 @@ int main()
 				}
 			}
 		}else{
+
 			// PC RECEBE O REGISTRADOR A 
 			if(Control_Unit.PCWrite == 1){
 				PC = Registradores[A];
+
 			}else{
 				//verificar os BNE da vida
 				if((BNE & Control_Unit.PCWriteCond) == 1){
@@ -270,16 +304,7 @@ int main()
 
 		}
 
-		// MUX DO BNE
-
-		if(Control_Unit.BNE == 0){
-			//BNE RECEBE SINAL zero DA ULA
-			BNE = Arithmetic_Unit.zero;
-
-		}else{
-			//BNE RECEBE NOT(SINAL zero) DA ULA
-			BNE = !Arithmetic_Unit.zero;
-		}
+		
 
 		Control_Unit.estado_atual = Control_Unit.proximo_estado;
 		cont++;
