@@ -65,7 +65,7 @@ typedef struct {
 
 int decifra_operacao(int inst);
 
-int decifra_instrucao(int inst);
+int decifra_instrucao(unsigned inst);
 
 void seta_sinal_controle(UC* u, int cod_inst);
 

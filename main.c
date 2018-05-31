@@ -24,11 +24,12 @@ int main()
 
 	fseek(arq, 0, SEEK_SET);
 
-	int* RAM = (int*) malloc(sizeof(int)*tamanho_arq);
+	unsigned int* RAM = (unsigned int*) malloc(sizeof(unsigned int)*tamanho_arq);
 	
 	for(i = 0; !feof(arq); i++){
 
-		fscanf(arq,"%d", &RAM[i]);
+		fscanf(arq,"%u", &RAM[i]);
+		printf("RAM[%d] = %u\n",i, RAM[i]);
 	}
 
 	fclose(arq);
@@ -50,7 +51,8 @@ int main()
 	ULA Arithmetic_Unit;
 
 	int cod_inst = 0;
-	int IR, MBR, MAR;
+	int IR;
+	int MBR, MAR;
 	int A, B;
 	short int immediate;
 	int ALUout;
@@ -59,8 +61,7 @@ int main()
 	int write_register;
 	int write_data;
 	int BNE;
-	int cont = 0;	
-
+	int cont = 0;
 
 	while(1){
 
@@ -96,7 +97,7 @@ int main()
 
 
 
-		cod_inst= decifra_instrucao(IR);
+		cod_inst = decifra_instrucao(IR);
 
 
 		if(cod_inst == -1){
@@ -122,12 +123,7 @@ int main()
 
 		
 		PCaux = (PC >> 27) << 27;
-		ENDjump = (((IR << 6) >> 4) | PCaux) / 4;
-
-		//printf("im = %d\n", immediate);
-		//printf("PCaux = %d\n",PCaux );
-		//printf("ENDjump %d\n", ENDjump | PCaux);
-		
+		ENDjump = (((IR << 6) >> 4) | PCaux) / 4;		
 
 		// MUX DO PARAMETRO A DA ULA
 		if(Control_Unit.ALUSrcA == 0){
@@ -171,10 +167,13 @@ int main()
 
 		if(Arithmetic_Unit.op == 0){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 + Arithmetic_Unit.param2;
+			printf("ULA OP = %d\n", Arithmetic_Unit.op);
+			printf("Arithmetic_Unit.result = %d\n", Arithmetic_Unit.result );
 		}else if(Arithmetic_Unit.op == 1){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 - Arithmetic_Unit.param2;
 			//printf("Arithmetic_Unit.result = %d\n",Arithmetic_Unit.result );
 			if(Arithmetic_Unit.result == 0){
+				//printf("oiiii\n");
 				Arithmetic_Unit.zero = 1;
 			}else{
 				Arithmetic_Unit.zero = 0;
@@ -185,7 +184,7 @@ int main()
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 | Arithmetic_Unit.param2;
 		}else if(Arithmetic_Unit.op == 5){
 			Arithmetic_Unit.result = Arithmetic_Unit.param1 - Arithmetic_Unit.param2;
-			if(Arithmetic_Unit.result <= 0){
+			if(Arithmetic_Unit.result < 0){
 				Arithmetic_Unit.zero = 1;
 				Arithmetic_Unit.result = 1;
 			}else{
@@ -213,6 +212,7 @@ int main()
 		}else if(Control_Unit.RegDst0 == 0 && Control_Unit.RegDst1 == 1){
 			// write register recebe $ra(31)
 			write_register = 31;
+			printf("ola\n");
 
 		}
 
@@ -223,6 +223,7 @@ int main()
 		if(Control_Unit.MemtoReg0 == 0 && Control_Unit.MemtoReg1 == 0){
 			// write data ALUout
 			write_data = ALUout;
+			printf("ALUout = %d\n", ALUout);
 
 		}else if(Control_Unit.MemtoReg0 == 1 && Control_Unit.MemtoReg1 == 0){
 			// write data recebe MBR( vai ser usada em casa de SW)
@@ -230,10 +231,12 @@ int main()
 
 		}else if(Control_Unit.MemtoReg0 == 0 && Control_Unit.MemtoReg1 == 1){
 			// write data recebe PC (em jal ou jalr)
+			//printf("ola2\n");
 			write_data = PC;
 		}
 
 		if(Control_Unit.RegWrite == 1){
+			//printf("ola2\n");
 			//printf("write_register = %d\n", write_register);
 				Registradores[write_register] = write_data;
 		}
@@ -248,7 +251,10 @@ int main()
 
 		}else{
 			//BNE RECEBE NOT(SINAL zero) DA ULA
+			//printf("BNE\n");
+			//printf("BNE = %d\n", BNE);
 			BNE = NOT(Arithmetic_Unit.zero);
+			//printf("!BNE = %d\n", BNE);
 			
 		}
 
@@ -268,13 +274,14 @@ int main()
 			// PC RECEBE ALUOut
 
 			//printf("PCWrite =  %d\n", Control_Unit.PCWrite);
-			if(Control_Unit.PCWrite == 1)
+			if(Control_Unit.PCWrite == 1){
+				//printf("OLA345\n");
 				PC = ALUout;
-			else{
+			}else{
 				//printf("BNE = %d\n", BNE);
 				//verificar os BNE da vida
 				if((BNE & Control_Unit.PCWriteCond) == 1){
-					
+					//printf("OLA345\n");
 					PC = ALUout;
 				}
 			}
@@ -295,7 +302,7 @@ int main()
 
 			// PC RECEBE O REGISTRADOR A 
 			if(Control_Unit.PCWrite == 1){
-				PC = Registradores[A];
+				PC = Registradores[A] / 4; //DIVIDO POR 4 POIS O VALOR GUARDADO NO REGISTRADO ESTÁ A BYTE E NÃO A PALAVRA
 
 			}else{
 				//verificar os BNE da vida
